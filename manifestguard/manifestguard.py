@@ -160,9 +160,22 @@ def relpath(path, root):
         return str(path)
 
 
+def require_dir(path):
+    if not path.is_dir():
+        print(f"error: no such directory: {path}", file=sys.stderr)
+        sys.exit(2)
+
+
+def require_file(path):
+    if not path.is_file():
+        print(f"error: no such file: {path}", file=sys.stderr)
+        sys.exit(2)
+
+
 def cmd_scan(args):
     rules = load_rules()
     root = Path(args.path).resolve()
+    require_dir(root)
     modules = build_modules(root, rules)
 
     rows = []
@@ -197,6 +210,7 @@ def cmd_scan(args):
 def cmd_generate(args):
     rules = load_rules()
     path = Path(args.path).resolve()
+    require_dir(path)
     categories = scan_tree_categories(path, rules)
     plist = build_manifest_plist(categories, rules)
 
@@ -212,6 +226,8 @@ def cmd_validate(args):
     rules = load_rules()
     manifest_path = Path(args.manifest).resolve()
     path = Path(args.path).resolve()
+    require_file(manifest_path)
+    require_dir(path)
 
     declared = parse_manifest(manifest_path)
     detected = scan_tree_categories(path, rules)
